@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AiNTERN – Find Internships</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --primary-dark: #1e293b;
+      --accent: #f39c12;
+      --bg: #f8fafc;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 20px;
+      font-size: 1.5rem;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .main {
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .filters select,
+    .filters input {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      min-width: 160px;
+      font-size: 0.95rem;
+    }
+
+    .selected-list {
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent);
+      color: white;
+      padding: 5px 10px;
+      margin: 5px 5px 0 0;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      cursor: default;
+    }
+
+    .chip button {
+      background: transparent;
+      border: none;
+      color: white;
+      margin-left: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .search-btn {
+      padding: 12px 25px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    .search-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    #internshipResults p {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .loading {
+      font-style: italic;
+      color: #666;
+    }
+    
+    .internship-item {
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .internship-details {
+      flex: 1;
+    }
+    
+    .internship-actions {
+      margin-left: 15px;
+    }
+    
+    .apply-btn {
+      background: #f57c00;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    
+    .apply-btn:hover {
+      background: #e65100;
+    }
+    
+    .applied-btn {
+      background: #4caf50;
+      cursor: default;
+    }
+    
+    .applied-btn:hover {
+      background: #4caf50;
+    }
+
+    @media (max-width: 600px) {
+      .filters select,
+      .filters input {
+        flex: 1 1 100%;
+      }
+      
+      .internship-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .internship-actions {
+        margin-left: 0;
+        margin-top: 10px;
+      }
+    }
+  </style>
+  <!-- Add Supabase JS client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="main">
+  <!-- Search & Filters -->
+  <div class="card">
+    <h2>Search & Filter</h2>
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="Search company, specialisation, or skill..." />
+
+      <select onchange="addFilter(this)">
+        <option disabled selected>Degree</option>
+        <option>B.A.</option>
+        <option>B.Com</option>
+        <option>B.E.</option>
+        <option>B.Sc.</option>
+        <option>B.Tech</option>
+        <option>BBA</option>
+        <option>Diploma</option>
+      </select>
+
+      <select onchange="addFilter(this)">
+        <option disabled selected>Languages</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Assamese</option>
+        <option>Bengali</option>
+        <option>Gujarati</option>
+        <option>Kannada</option>
+        <option>Kashmiri</option>
+        <option>Malayalam</option>
+        <option>Manipuri</option>
+        <option>Marathi</option>
+        <option>Nepali</option>
+        <option>Odia</option>
+        <option>Punjabi</option>
+        <option>Sanskrit</option>
+        <option>Sindhi</option>
+        <option>Tamil</option>
+        <option>Telugu</option>
+        <option>Urdu</option>
+      </select>
+
+      <select onchange="addFilter(this)">
+        <option disabled selected>Skills</option>
+        <option>Sql</option>
+        <option>Marketing</option>
+        <option>MS excel</option>
+        <option>Java</option>
+        <option>C++</option>
+        <option>Sales</option>
+        <option>Data learning</option>
+        <option>Python</option>
+        <option>Tableau</option>
+        <option>Power bi</option>
+      </select>
+
+      <select onchange="addFilter(this)">
+        <option disabled selected>Domains</option>
+        <option>Consulting</option>
+        <option>IT</option>
+        <option>Operations</option>
+        <option>Data Analytics</option>
+        <option>Marketing</option>
+        <option>Design</option>
+        <option>Data learning</option>
+        <option>HR</option>
+        <option>Finance</option>
+        <option>Engineering</option>
+        <option>R&D</option>
+      </select>
+      
+      <select onchange="addFilter(this)">
+        <option disabled selected>Competitions</option>
+        <option>Case Study Competition</option>
+        <option>Business Plan Runner-up</option>
+        <option>Design Challenge Participant2</option>
+        <option>Coding Contest Top 10</option>
+        <option>Math Olympiad State Level</option>
+        <option>Hackathon Winner</option>
+        <option>None</option>
+      </select>
+
+    <select onchange="addFilter(this)">
+        <option disabled selected>Specialisation</option>
+        <option>Data Science</option>
+        <option>Civil</option>
+        <option>Marketing</option>
+        <option>Computer Science</option>
+        <option>Finance</option>
+        <option>Biotechnology</option>
+        <option>Electronics</option>
+        <option>Chemical</option>
+        <option>Mechanical</option>
+        <option>Electrical</option>
+      </select>
+
+    </div>
+
+    <div class="selected-list" id="selectedFilters"></div>
+    <button class="search-btn" onclick="searchInternships()">Search</button>
+  </div>
+
+  <!-- Results -->
+  <div class="card" id="internshipResults">
+    <h2>Available Internships</h2>
+    <p class="loading">Use the search button to find internships</p>
+  </div>
+
+  <div id="debugOutput" style="margin-top:12px;color:#444;"></div>
+</div>
+
+<script>
+  // Initialize Supabase client
+  const SUPABASE_URL = 'https://xozzpzasbdvgpyysuvew.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvenpwemFzYmR2Z3B5eXN1dmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MDA0NjMsImV4cCI6MjA3MzI3NjQ2M30.SiiaH38cNz21EHpvGOZNQCQ5vW2f6H2GBocGn4qYfGM';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const selected = [];
+  let searchInFlight = false;
+  let searchController = null;
+
+  function addFilter(select) {
+    const value = select.value;
+    if (value && !selected.includes(value)) {
+      selected.push(value);
+      updateSelectedList();
+    }
+    select.selectedIndex = 0;
+  }
+
+  function updateSelectedList() {
+    const container = document.getElementById("selectedFilters");
+    container.innerHTML = "";
+    selected.forEach((item, index) => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.innerHTML = `${item} <button onclick="removeFilter(${index})">&times;</button>`;
+      container.appendChild(chip);
+    });
+  }
+
+  function removeFilter(index) {
+    selected.splice(index, 1);
+    updateSelectedList();
+  }
+
+  // Function to check if user has already applied to an internship
+  function hasApplied(company, role) {
+    const applications = JSON.parse(localStorage.getItem('internshipApplications')) || [];
+    return applications.some(app => app.company === company && app.role === role);
+  }
+
+  // Function to handle applying to an internship
+  function applyToInternship(company, role) {
+    // Check if already applied
+    if (hasApplied(company, role)) {
+      alert('You have already applied to this internship!');
+      return;
+    }
+    
+    // Create application object
+    const application = {
+      company: company,
+      role: role,
+      appliedOn: new Date().toLocaleDateString(),
+      status: 'Applied',
+      timeline: 'Applied → Awaiting Review'
+    };
+    
+    // Get existing applications
+    const applications = JSON.parse(localStorage.getItem('internshipApplications')) || [];
+    
+    // Add new application
+    applications.push(application);
+    
+    // Save back to localStorage
+    localStorage.setItem('internshipApplications', JSON.stringify(applications));
+    
+    // Update UI to show applied status
+    updateApplyButtons();
+    
+    // Redirect to applications page
+    window.location.href = `applications.html?company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
+  }
+
+  // Function to update Apply buttons based on application status
+  function updateApplyButtons() {
+    const applyButtons = document.querySelectorAll('.apply-btn');
+    applyButtons.forEach(button => {
+      const company = button.getAttribute('data-company');
+      const role = button.getAttribute('data-role');
+      
+      if (hasApplied(company, role)) {
+        button.textContent = 'Applied';
+        button.classList.add('applied-btn');
+        button.onclick = null;
+      }
+    });
+  }
+
+  // Replaced searchInternships with safe version (fetch all rows, filter in JS)
+  async function searchInternships() {
+    if (searchInFlight && searchController) {
+      try { searchController.abort(); } catch (_) {}
+    }
+    searchInFlight = true;
+    searchController = new AbortController();
+
+    const results = document.getElementById("internshipResults");
+    const queryText = document.getElementById("searchInput").value.trim();
+    results.innerHTML = "<h2>Available Internships</h2><p class='loading'>Searching...</p>";
+
+    // timeout fallback
+    let timeoutId = setTimeout(() => {
+      if (searchInFlight) {
+        results.innerHTML = "<h2>Available Internships</h2><p>Search timed out. Check Supabase URL/key/network.</p>";
+        searchInFlight = false;
+        const btn = document.querySelector('.search-btn');
+        if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+      }
+    }, 10000);
+
+    // simple connectivity check
+    try {
+      const test = await supabase.from('CompaniesData').select('CompanyName').limit(1);
+      if (test.error) {
+        clearTimeout(timeoutId);
+        results.innerHTML = "<h2>Available Internships</h2><p>Supabase connection failed: " + (test.error.message || test.error) + "</p>";
+        searchInFlight = false;
+        const btn = document.querySelector('.search-btn');
+        if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+        return;
+      }
+    } catch (e) {
+      clearTimeout(timeoutId);
+      results.innerHTML = "<h2>Available Internships</h2><p>Supabase connection failed: " + (e.message || e) + "</p>";
+      searchInFlight = false;
+      const btn = document.querySelector('.search-btn');
+      if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+      return;
+    }
+
+    // filter definition (matches your Supabase columns you told me)
+    const filterCategories = {
+      Degree: ["B.A.","B.Com","B.E.","B.Sc.","B.Tech","BBA","Diploma"],
+      Languages: ["Hindi","English","Assamese","Bengali","Gujarati","Kannada","Kashmiri","Malayalam","Manipuri","Marathi","Nepali","Odia","Punjabi","Sanskrit","Sindhi","Tamil","Telugu","Urdu"],
+      Skills: ["Accounting","CAD Design","Cloud Computing","Coding","Financial Analysis","Lab Skills","Machine Learning","Marketing","Programming","Research","Robotics","SEO","UI/UX","Writing"],
+      Projects: ["0","1","2","3","4","5","6","7","8"],
+      "Past Experience(months)": ["0","1","2","3","4","5","6","7","8","9","10","11","12"],
+      Competitions: ["0","1","2","3","4","5","6","7","8","9","10"],
+      Specialisation: ["AI","Biology","Chemistry","Commerce","Computer Science","Engineering","Finance","Genetics","History","IT","Literature","Marketing","Mechanical Engineering","Physics","Sociology"]
+    };
+
+    // group selected filters
+    const filters = {};
+    Object.entries(filterCategories).forEach(([key, values]) => {
+      const matched = selected.filter(v => values.includes(v));
+      if (matched.length) filters[key] = matched;
+    });
+
+    // FETCH rows only (no column filters in URL)
+    let data, error;
+    try {
+      const resp = await supabase.from('CompaniesData').select('*');
+      data = resp.data;
+      error = resp.error;
+      console.log("Supabase response (fetched rows):", resp);
+    } catch (e) {
+      error = e;
+      data = null;
+      console.error("Supabase JS error:", e);
+    }
+    clearTimeout(timeoutId);
+
+    // render header fresh
+    results.innerHTML = "<h2>Available Internships</h2>";
+
+    if (error) {
+      console.error("Supabase error:", error);
+      results.innerHTML += `<p>Failed to search: ${error.message || error.toString()}. See console.</p>`;
+      searchInFlight = false;
+      const btn = document.querySelector('.search-btn');
+      if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+      return;
+    }
+    if (!data || !data.length) {
+      results.innerHTML += "<p>No internships match your criteria or CompaniesData is empty.</p>";
+      searchInFlight = false;
+      const btn = document.querySelector('.search-btn');
+      if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+      return;
+    }
+
+    // Client-side filtering (case-insensitive). Handles multi-valued Languages/Skills cells.
+    const q = queryText.toLowerCase();
+    const filtered = data.filter(row => {
+      // dropdown filters
+      for (const [key, arr] of Object.entries(filters)) {
+        if (!(key in row)) return false; // defensive: missing column = no match
+        const raw = row[key];
+        if (raw === null || raw === undefined) return false;
+        const rawStr = String(raw).trim();
+        if (key === "Languages" || key === "Skills") {
+          const vals = rawStr.split(/[,;]+/).map(v => v.trim().toLowerCase());
+          if (!arr.some(sel => vals.includes(String(sel).toLowerCase()))) return false;
+        } else {
+          const matchFound = arr.some(sel => String(sel).toLowerCase() === rawStr.toLowerCase());
+          if (!matchFound) return false;
+        }
+      }
+      // free-text search across CompanyName, Specialisation, Skills
+      if (q) {
+        const name = String(row.CompanyName || '').toLowerCase();
+        const spec = String(row.Specialisation || '').toLowerCase();
+        const skills = String(row.Skills || '').toLowerCase();
+        if (!name.includes(q) && !spec.includes(q) && !skills.includes(q)) return false;
+      }
+      return true;
+    });
+
+    if (!filtered.length) {
+      results.innerHTML += "<p>No internships match your criteria after filtering.</p>";
+      searchInFlight = false;
+      const btn = document.querySelector('.search-btn');
+      if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+      return;
+    }
+
+    // scoring & sorting (case-insensitive)
+    filtered.sort((a, b) => {
+      function matchScore(row) {
+        let score = 0;
+        Object.entries(filters).forEach(([key, arr]) => {
+          const val = row[key];
+          if (val === null || val === undefined) return;
+          if (key === "Languages" || key === "Skills") {
+            const vals = String(val).split(/[,;]+/).map(v => v.trim().toLowerCase());
+            arr.forEach(sel => { if (vals.includes(String(sel).toLowerCase())) score++; });
+          } else {
+            const rawStr = String(val).trim().toLowerCase();
+            arr.forEach(sel => { if (String(sel).toLowerCase() === rawStr) score++; });
+          }
+        });
+        return score;
+      }
+      return matchScore(b) - matchScore(a);
+    });
+
+    // Clear results and add header
+    results.innerHTML = "<h2>Available Internships</h2>";
+    
+    // render results
+    filtered.forEach((m, idx) => {
+      const companyName = m.CompanyName || '';
+      const specialisation = m.Specialisation || '';
+      const role = specialisation ? `${specialisation} Intern` : 'Intern';
+      
+      const meta = [
+        m.Degree,
+        m.Languages,
+        m.Skills,
+        m["Past Experience(months)"],
+        m.Projects,
+        m.Competitions
+      ].filter(Boolean).join(' • ');
+      
+      const badge = idx === 0 ? ' <span style="color:green;font-weight:bold;">Best Match</span>' : '';
+      
+      // Check if user has already applied
+      const applied = hasApplied(companyName, role);
+      
+      // Create a div for each internship with an Apply button
+      const internshipDiv = document.createElement('div');
+      internshipDiv.className = 'internship-item';
+      internshipDiv.innerHTML = `
+        <div class="internship-details">
+          <strong>${companyName}</strong> – ${role}
+          ${meta ? `<br><small>(${meta})</small>` : ''}
+          ${badge}
+        </div>
+        <div class="internship-actions">
+          <button class="apply-btn ${applied ? 'applied-btn' : ''}" 
+                  data-company="${companyName}" 
+                  data-role="${role}"
+                  ${applied ? 'disabled' : ''}>
+            ${applied ? 'Applied' : 'Apply'}
+          </button>
+        </div>
+      `;
+      
+      // Add event listener if not already applied
+      if (!applied) {
+        const applyButton = internshipDiv.querySelector('.apply-btn');
+        applyButton.addEventListener('click', () => applyToInternship(companyName, role));
+      }
+      
+      results.appendChild(internshipDiv);
+    });
+
+    searchInFlight = false;
+    const btn = document.querySelector('.search-btn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Search'; }
+  }
+
+  // New: fetch one row and show its keys/values so you can confirm column names
+  async function inspectFirstRow() {
+    const out = document.getElementById('debugOutput');
+    out.textContent = 'Inspecting first row...';
+    try {
+      const resp = await supabase.from('CompaniesData').select('*').limit(1);
+      if (resp.error) {
+        out.innerHTML = `<b>Inspect error:</b> ${resp.error.message || JSON.stringify(resp.error)}`;
+        console.error('Inspect error:', resp);
+        return;
+      }
+      const row = (resp.data && resp.data[0]) || null;
+      if (!row) { out.textContent = 'No rows found in CompaniesData.'; return; }
+      // show keys and sample values
+      const parts = Object.entries(row).map(([k,v]) => `<div><b>${k}</b>: ${String(v)}</div>`).join('');
+      out.innerHTML = `<div><b>First row keys & values:</b></div>${parts}`;
+      console.log('First row:', row);
+    } catch (e) {
+      out.innerHTML = `<b>Inspect failed:</b> ${e.message || e}`;
+      console.error('Inspect failed:', e);
+    }
+  }
+</script>
+</body>
+</html>
