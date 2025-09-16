@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Login | PM Internship Portal</title>
+  <link rel="icon" type="image/png" href="AinternFavicon.png">
+  <style>
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #007bff, #00c6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .auth-container {
+      background: #fff;
+      padding: 40px 35px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 24px;
+    }
+
+    .auth-form {
+      text-align: left;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 4px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,123,255,0.4);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+      transform: scale(1.02);
+    }
+
+    .switch {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .switch a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .switch a:hover {
+      text-decoration: underline;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h2>🔑 Student Login</h2>
+    <form id="loginForm" class="auth-form">
+      <label for="student-email">Email</label>
+      <input type="email" id="student-email" placeholder="Enter your email" required>
+
+      <label for="student-password">Password</label>
+      <input type="password" id="student-password" placeholder="Enter your password" required>
+
+      <button type="submit" class="btn">Login</button>
+      <p class="switch">New here? <a href="round1.html">Register Now</a></p>
+    </form>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } 
+            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbMUoq3Cjx3IvWo-b2hPsp-s9E3cAHRsY",
+      authDomain: "aintern-285f9.firebaseapp.com",
+      projectId: "aintern-285f9",
+      storageBucket: "aintern-285f9.firebasestorage.app",
+      messagingSenderId: "1035209257137",
+      appId: "1:1035209257137:web:dd20ce2d10842d6f127290",
+      measurementId: "G-4QSNCJQYFY"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("student-email").value;
+      const password = document.getElementById("student-password").value;
+
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        alert("✅ Login successful!");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        alert("❌ Error: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
